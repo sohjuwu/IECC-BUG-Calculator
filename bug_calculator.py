@@ -207,4 +207,6 @@ tk.Label(root, text="Ratio A ≤0.5 MH  |  B >0.5–1 MH  |  C >1–2 MH  |  D >
 
 # Run initial calculation with defaults
 root.after(100, calculate)
+tk.Label(root, text="Developed by J.Villarosa, 20260608 | Assisted by Claude AI",
+         font=small_font, bg=BG, fg="#6c757d").grid(row=5, column=0, pady=(0, 8))
 root.mainloop()
