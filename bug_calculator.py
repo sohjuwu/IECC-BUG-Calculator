@@ -80,7 +80,7 @@ def calculate():
     max_g = LZ_GLARE[zone][g_ratio]
 
     # Update ratio labels
-    lbl_ratio_val.config(text=f"Ratio {b_ratio}  (min dist / MH = {min_dist/mh:.2f})")
+    #lbl_ratio_val.config(text=f"Ratio {b_ratio}  (min dist / MH = {min_dist/mh:.2f})")
 
     def fmt(v):
         return str(v) if v != "N/A" else "N/A (zone not applicable)"
@@ -191,12 +191,12 @@ def make_result_row(parent, label, row):
     val.grid(row=row, column=1, padx=14, pady=5, sticky="w")
     return lbl, val
 
-lbl_ratio_lbl, lbl_ratio_val = make_result_row(result_frame, "Calculated Ratio:", 1)
+#lbl_ratio_lbl, lbl_ratio_val = make_result_row(result_frame, "Calculated Ratio:", 1)
 lbl_b_lbl,     lbl_b_val     = make_result_row(result_frame, "Max B (Backlight):", 2)
 lbl_u_lbl,     lbl_u_val     = make_result_row(result_frame, "Max U (Uplight):",   3)
 lbl_g_lbl,     lbl_g_val     = make_result_row(result_frame, "Max G (Glare):",     4)
 
-result_widgets = [lbl_ratio_lbl, lbl_ratio_val,
+result_widgets = [#lbl_ratio_lbl, lbl_ratio_val,
                   lbl_b_lbl, lbl_b_val,
                   lbl_u_lbl, lbl_u_val,
                   lbl_g_lbl, lbl_g_val]
