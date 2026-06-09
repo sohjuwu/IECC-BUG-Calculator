@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, font
+import sys, os
 
 # BUG Rating lookup tables from the spreadsheet (IES TM-15)
 
@@ -12,7 +13,6 @@ LZ_BACKLIGHT = {
 }
 
 LZ_UPLIGHT = {
-    # (zone, fixture_type) -> max U
     ("LZ0", "Area Lighting"): "N/A",
     ("LZ0", "Other"):         "N/A",
     ("LZ1", "Area Lighting"): 0,
@@ -35,8 +35,6 @@ LZ_GLARE = {
 
 def get_ratio_category(distance, mh):
     """Return ratio category A/B/C/D based on distance vs mounting height."""
-    if mh <= 0:
-        return None
     ratio = distance / mh
     if ratio <= 0.5:
         return "A"
@@ -72,15 +70,13 @@ def calculate():
     fixture = combo_fixture.get()
     min_dist = min(front, back)
 
-    b_ratio = get_ratio_category(min_dist, mh)
-    g_ratio = get_ratio_category(min_dist, mh)
+    # B, U, G each use their OWN independent lookup — no shared state
+    b_ratio = get_ratio_category(min_dist, mh)   # Backlight ratio
+    g_ratio = get_ratio_category(min_dist, mh)   # Glare ratio (independent)
 
-    max_b = LZ_BACKLIGHT[zone][b_ratio]
-    max_u = LZ_UPLIGHT[(zone, fixture)]
-    max_g = LZ_GLARE[zone][g_ratio]
-
-    # Update ratio labels
-    #lbl_ratio_val.config(text=f"Ratio {b_ratio}  (min dist / MH = {min_dist/mh:.2f})")
+    max_b = LZ_BACKLIGHT[zone][b_ratio]           # Backlight only
+    max_u = LZ_UPLIGHT[(zone, fixture)]           # Uplight only (no ratio)
+    max_g = LZ_GLARE[zone][g_ratio]               # Glare only
 
     def fmt(v):
         return str(v) if v != "N/A" else "N/A (zone not applicable)"
@@ -89,7 +85,6 @@ def calculate():
     lbl_u_val.config(text=fmt(max_u))
     lbl_g_val.config(text=fmt(max_g))
 
-    # Color-code results
     def color(v):
         if v == "N/A":
             return "#6c757d"
@@ -115,6 +110,13 @@ root.title("BUG Rating Calculator")
 root.resizable(False, False)
 root.configure(bg="#f8f9fa")
 
+# Icon
+try:
+    icon_path = os.path.join(sys._MEIPASS, "icon.ico") if hasattr(sys, "_MEIPASS") else "icon.ico"
+    root.iconbitmap(icon_path)
+except Exception:
+    pass
+
 title_font  = font.Font(family="Segoe UI", size=14, weight="bold")
 label_font  = font.Font(family="Segoe UI", size=10)
 value_font  = font.Font(family="Segoe UI", size=11, weight="bold")
@@ -137,9 +139,9 @@ inp_frame = tk.LabelFrame(root, text=" Inputs ", font=label_font,
 inp_frame.grid(row=2, column=0, padx=20, pady=12, sticky="ew")
 
 fields = [
-    ("Mounting Height (ft):",              "entry_mh",      "20"),
-    ("Distance from Property Line – Front (ft):", "entry_front", "41"),
-    ("Distance from Property Line – Back (ft):",  "entry_back",  "100"),
+    ("Mounting Height (ft):",                      "entry_mh",    "20"),
+    ("Distance from Property Line – Front (ft):",  "entry_front", "41"),
+    ("Distance from Property Line – Back (ft):",   "entry_back",  "100"),
 ]
 entries = {}
 for i, (lbl, var, default) in enumerate(fields):
@@ -191,21 +193,18 @@ def make_result_row(parent, label, row):
     val.grid(row=row, column=1, padx=14, pady=5, sticky="w")
     return lbl, val
 
-#lbl_ratio_lbl, lbl_ratio_val = make_result_row(result_frame, "Calculated Ratio:", 1)
-lbl_b_lbl,     lbl_b_val     = make_result_row(result_frame, "Max B (Backlight):", 2)
-lbl_u_lbl,     lbl_u_val     = make_result_row(result_frame, "Max U (Uplight):",   3)
-lbl_g_lbl,     lbl_g_val     = make_result_row(result_frame, "Max G (Glare):",     4)
+lbl_b_lbl, lbl_b_val = make_result_row(result_frame, "Max B (Backlight):", 1)
+lbl_u_lbl, lbl_u_val = make_result_row(result_frame, "Max U (Uplight):",   2)
+lbl_g_lbl, lbl_g_val = make_result_row(result_frame, "Max G (Glare):",     3)
 
-result_widgets = [#lbl_ratio_lbl, lbl_ratio_val,
-                  lbl_b_lbl, lbl_b_val,
+result_widgets = [lbl_b_lbl, lbl_b_val,
                   lbl_u_lbl, lbl_u_val,
                   lbl_g_lbl, lbl_g_val]
 
 # ── Footer ───────────────────────────────────────────────────────────────────
-
+tk.Label(root, text="Developed by J.Villarosa | Assisted by Claude AI",
+         font=small_font, bg=BG, fg="#6c757d").grid(row=5, column=0, pady=(0, 8))
 
 # Run initial calculation with defaults
 root.after(100, calculate)
-tk.Label(root, text="Developed by J.Villarosa | Assisted by Claude AI",
-         font=small_font, bg=BG, fg="#6c757d").grid(row=5, column=0, pady=(0, 8))
 root.mainloop()
