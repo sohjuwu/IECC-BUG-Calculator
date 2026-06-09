@@ -68,11 +68,9 @@ def calculate():
 
     zone = combo_zone.get()
     fixture = combo_fixture.get()
-    min_dist = min(front, back)
-
-    # B, U, G each use their OWN independent lookup — no shared state
-    b_ratio = get_ratio_category(min_dist, mh)   # Backlight ratio
-    g_ratio = get_ratio_category(min_dist, mh)   # Glare ratio (independent)
+    # Backlight uses BACK distance, Glare uses FRONT distance (per Excel formulas)
+    b_ratio = get_ratio_category(back, mh)    # Backlight: D2/B2 (back dist / MH)
+    g_ratio = get_ratio_category(front, mh)   # Glare:     C2/B2 (front dist / MH)
 
     max_b = LZ_BACKLIGHT[zone][b_ratio]           # Backlight only
     max_u = LZ_UPLIGHT[(zone, fixture)]           # Uplight only (no ratio)
